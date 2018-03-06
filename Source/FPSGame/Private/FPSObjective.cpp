@@ -2,6 +2,7 @@
 
 #include "FPSObjective.h"
 
+#include "Components/SphereComponent.h"
 
 // Sets default values
 AFPSObjective::AFPSObjective()
@@ -9,13 +10,19 @@ AFPSObjective::AFPSObjective()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+	RootComponent = MeshComp;
+
+	SphereCompCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCompCollision"));
+	SphereCompCollision->SetupAttachment(MeshComp);
 }
 
 // Called when the game starts or when spawned
 void AFPSObjective::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+
 }
 
 // Called every frame
