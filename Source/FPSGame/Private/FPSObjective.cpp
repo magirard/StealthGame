@@ -3,11 +3,10 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "FPSCharacter.h"
 
 AFPSObjective::AFPSObjective()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RootComponent = MeshComp;
@@ -29,13 +28,16 @@ void AFPSObjective::PlayEffects()
 	UGameplayStatics::SpawnEmitterAtLocation(this, PickupFX, GetActorLocation());
 }
 
-void AFPSObjective::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 void AFPSObjective::NotifyActorBeginOverlap(AActor* other)
 {
 	Super::NotifyActorBeginOverlap(other);
-	PlayEffects();
+	AFPSCharacter* testCharacter = Cast<AFPSCharacter>(other);
+
+	if (testCharacter)
+	{
+		testCharacter->bIsCarryingObjective = true;
+		PlayEffects();
+		Destroy();
+	}
+	
 }
