@@ -7,7 +7,7 @@
 #include "FPSObjective.generated.h"
 
 class USphereComponent;
-
+class UStaticMeshComponent;
 
 UCLASS()
 class FPSGAME_API AFPSObjective : public AActor
@@ -26,12 +26,19 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USphereComponent* SphereCompCollision;
 
+	UPROPERTY(EditDefaultsOnly, Category = "FX")
+	UParticleSystem* PickupFX;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void PlayEffects();
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void NotifyActorBeginOverlap(AActor* other);
 
 	
 	

@@ -1,34 +1,41 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "FPSObjective.h"
 
 #include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 
-// Sets default values
 AFPSObjective::AFPSObjective()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RootComponent = MeshComp;
 
 	SphereCompCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCompCollision"));
+	SphereCompCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SphereCompCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	SphereCompCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	SphereCompCollision->SetupAttachment(MeshComp);
 }
 
-// Called when the game starts or when spawned
 void AFPSObjective::BeginPlay()
 {
 	Super::BeginPlay();
-
-
 }
 
-// Called every frame
+void AFPSObjective::PlayEffects()
+{
+	UGameplayStatics::SpawnEmitterAtLocation(this, PickupFX, GetActorLocation());
+}
+
 void AFPSObjective::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
+void AFPSObjective::NotifyActorBeginOverlap(AActor* other)
+{
+	Super::NotifyActorBeginOverlap(other);
+	PlayEffects();
+}
