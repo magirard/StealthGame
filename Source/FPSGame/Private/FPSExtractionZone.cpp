@@ -5,7 +5,8 @@
 #include "Components/BoxComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/DecalComponent.h"
-
+#include "FPSCharacter.h"
+#include "FPSGameMode.h"
 AFPSExtractionZone::AFPSExtractionZone()
 {
 	TriggerZone = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerZone"));
@@ -28,5 +29,15 @@ AFPSExtractionZone::AFPSExtractionZone()
 void AFPSExtractionZone::OnHeroOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
 	UE_LOG(LogTemp, Log, TEXT("Overlapped with extraction zone"));
+
+	AFPSCharacter* MyPawn = Cast<AFPSCharacter>(OtherActor);
+	if (MyPawn && MyPawn->bIsCarryingObjective)
+	{
+		AFPSGameMode* gameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
+		if (gameMode)
+		{
+			gameMode->CompleteMission(MyPawn);
+		}
+	}
 }
 
