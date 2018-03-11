@@ -4,6 +4,7 @@
 
 #include "Components/BoxComponent.h"
 #include "Components/PrimitiveComponent.h"
+#include "Components/DecalComponent.h"
 
 AFPSExtractionZone::AFPSExtractionZone()
 {
@@ -17,6 +18,10 @@ AFPSExtractionZone::AFPSExtractionZone()
 	RootComponent = TriggerZone;
 
 	TriggerZone->OnComponentBeginOverlap.AddDynamic(this, &AFPSExtractionZone::OnHeroOverlap);
+
+	DecalComp = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
+	DecalComp->DecalSize = FVector(200);
+	DecalComp->SetupAttachment(RootComponent);
 }
 
 

@@ -9,6 +9,7 @@
 
 class UBoxComponent;
 class UPrimitiveComponent;
+class UDecalComponent;
 
 UCLASS()
 class FPSGAME_API AFPSExtractionZone : public AActor
@@ -23,6 +24,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Triggers")
 		UBoxComponent* TriggerZone;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Triggers")
+		UDecalComponent* DecalComp;
 
 	UFUNCTION()
 	void OnHeroOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
