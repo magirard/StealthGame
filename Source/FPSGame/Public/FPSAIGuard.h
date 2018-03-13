@@ -16,7 +16,7 @@ class FPSGAME_API AFPSAIGuard : public ACharacter
 
 public:
 	AFPSAIGuard();
-
+	~AFPSAIGuard();
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent * PawnSensingComp;
@@ -24,6 +24,9 @@ protected:
 
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
+
+	UFUNCTION()
+	void OnHearNoise(APawn* aInstigator, const FVector& Location, float Volume);
 
 public:	
 	virtual void Tick(float DeltaTime) override;

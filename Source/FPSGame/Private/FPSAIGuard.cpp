@@ -13,12 +13,22 @@ AFPSAIGuard::AFPSAIGuard()
 	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComponent"));
 
 	PawnSensingComp->OnSeePawn.AddDynamic(this, &AFPSAIGuard::OnPawnSeen);
+	PawnSensingComp->OnHearNoise.AddDynamic(this, &AFPSAIGuard::OnHearNoise);
+}
+
+AFPSAIGuard::~AFPSAIGuard()
+{
 }
 
 // Called when the game starts or when spawned
 void AFPSAIGuard::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void AFPSAIGuard::OnHearNoise(APawn* aInstigator, const FVector& Location, float Volume)
+{
+	DrawDebugSphere(GetWorld(), Location, 32.0f, 12, FColor::Red, false, 10.0f);
 }
 
 void AFPSAIGuard::OnPawnSeen(APawn * Pawn)
