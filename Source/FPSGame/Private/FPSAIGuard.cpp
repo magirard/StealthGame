@@ -15,6 +15,8 @@ AFPSAIGuard::AFPSAIGuard()
 
 	PawnSensingComp->OnSeePawn.AddDynamic(this, &AFPSAIGuard::OnPawnSeen);
 	PawnSensingComp->OnHearNoise.AddDynamic(this, &AFPSAIGuard::OnHearNoise);
+
+	GuardAIState = EAIState::Idle;
 }
 
 AFPSAIGuard::~AFPSAIGuard()
@@ -30,6 +32,11 @@ void AFPSAIGuard::BeginPlay()
 
 void AFPSAIGuard::OnHearNoise(APawn* aInstigator, const FVector& Location, float Volume)
 {
+	if (GuardAIState != EAIState::Alerted)
+	{
+		return;
+	}
+
 	FVector direction = Location - GetActorLocation();
 	direction.Normalize();
 
@@ -42,12 +49,29 @@ void AFPSAIGuard::OnHearNoise(APawn* aInstigator, const FVector& Location, float
 	
 	GetWorldTimerManager().ClearTimer(TimerHandle_ResetOrientation);
 	GetWorldTimerManager().SetTimer(TimerHandle_ResetOrientation, this, &AFPSAIGuard::ResetOrientation, 3.0f);
+
+
+	SetAIState(EAIState::Suspicious);
 }
 
+void AFPSAIGuard::SetAIState(EAIState newState)
+{
+	if (newState != GuardAIState)
+	{
+		GuardAIState = newState;
+		OnStateChanged(GuardAIState);
+	}
+
+}
 void AFPSAIGuard::ResetOrientation()
 {
-	SetActorRotation(OriginalRotation);
+	if (GuardAIState == EAIState::Alerted)
+	{
+		return;
+	}
 
+	SetActorRotation(OriginalRotation);
+	SetAIState(EAIState::Idle);
 }
 
 void AFPSAIGuard::OnPawnSeen(APawn * Pawn)
@@ -56,6 +80,8 @@ void AFPSAIGuard::OnPawnSeen(APawn * Pawn)
 	{
 		return;
 	}
+
+	SetAIState(EAIState::Alerted);
 	DrawDebugSphere(GetWorld(), Pawn->GetActorLocation(), 32.0f, 12, FColor::Yellow, false, 10.0f);
 
 	AFPSGameMode* gameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
