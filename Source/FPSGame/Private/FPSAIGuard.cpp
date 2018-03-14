@@ -24,11 +24,29 @@ AFPSAIGuard::~AFPSAIGuard()
 void AFPSAIGuard::BeginPlay()
 {
 	Super::BeginPlay();
+	OriginalRotation = GetActorRotation();
 }
 
 void AFPSAIGuard::OnHearNoise(APawn* aInstigator, const FVector& Location, float Volume)
 {
+	FVector direction = Location - GetActorLocation();
+	direction.Normalize();
+
+	FRotator newRot = FRotationMatrix::MakeFromX(direction).Rotator();
+	newRot.Pitch = 0.0f;
+	newRot.Roll = 0.0f;
+	SetActorRotation(newRot);
 	DrawDebugSphere(GetWorld(), Location, 32.0f, 12, FColor::Red, false, 10.0f);
+
+	
+	GetWorldTimerManager().ClearTimer(TimerHandle_ResetOrientation);
+	GetWorldTimerManager().SetTimer(TimerHandle_ResetOrientation, this, &AFPSAIGuard::ResetOrientation, 3.0f);
+}
+
+void AFPSAIGuard::ResetOrientation()
+{
+	SetActorRotation(OriginalRotation);
+
 }
 
 void AFPSAIGuard::OnPawnSeen(APawn * Pawn)

@@ -28,6 +28,12 @@ protected:
 	UFUNCTION()
 	void OnHearNoise(APawn* aInstigator, const FVector& Location, float Volume);
 
+	FRotator OriginalRotation;
+	FTimerHandle TimerHandle_ResetOrientation;
+
+	UFUNCTION()
+	void ResetOrientation();
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 };
