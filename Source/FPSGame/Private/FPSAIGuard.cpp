@@ -4,6 +4,7 @@
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
 #include "FPSGameMode.h"
+#include "AI/Navigation/NavigationSystem.h"
 
 // Sets default values
 AFPSAIGuard::AFPSAIGuard()
@@ -17,6 +18,7 @@ AFPSAIGuard::AFPSAIGuard()
 	PawnSensingComp->OnHearNoise.AddDynamic(this, &AFPSAIGuard::OnHearNoise);
 
 	GuardAIState = EAIState::Idle;
+	goingUpPatrol = true;
 }
 
 AFPSAIGuard::~AFPSAIGuard()
@@ -28,11 +30,16 @@ void AFPSAIGuard::BeginPlay()
 {
 	Super::BeginPlay();
 	OriginalRotation = GetActorRotation();
+
+	if (bPatrol)
+	{
+		UNavigationSystem::SimpleMoveToActor(GetController(), PatrolPath[mCurrentPatrolPointId]);
+	}
 }
 
 void AFPSAIGuard::OnHearNoise(APawn* aInstigator, const FVector& Location, float Volume)
 {
-	if (GuardAIState != EAIState::Alerted)
+	if (GuardAIState == EAIState::Alerted)
 	{
 		return;
 	}
@@ -52,6 +59,8 @@ void AFPSAIGuard::OnHearNoise(APawn* aInstigator, const FVector& Location, float
 
 
 	SetAIState(EAIState::Suspicious);
+
+	GetController()->StopMovement();
 }
 
 void AFPSAIGuard::SetAIState(EAIState newState)
@@ -72,6 +81,10 @@ void AFPSAIGuard::ResetOrientation()
 
 	SetActorRotation(OriginalRotation);
 	SetAIState(EAIState::Idle);
+	if (bPatrol)
+	{
+		UNavigationSystem::SimpleMoveToActor(GetController(), PatrolPath[mCurrentPatrolPointId]);
+	}
 }
 
 void AFPSAIGuard::OnPawnSeen(APawn * Pawn)
@@ -89,11 +102,60 @@ void AFPSAIGuard::OnPawnSeen(APawn * Pawn)
 	{
 		gameMode->CompleteMission(Pawn, false);
 	}
+
+	GetController()->StopMovement();
 }
 
 // Called every frame
 void AFPSAIGuard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (GuardAIState == EAIState::Idle)
+	{
+		if (bPatrol && PatrolPath.Num() >= 2)
+		{
+			/*
+			FVector direction = PatrolPath[mCurrentPatrolPointId]->GetActorLocation() - GetActorLocation();
+			float dist = direction.Size();
+			direction.Normalize();
 
+			FRotator newRot = FRotationMatrix::MakeFromX(direction).Rotator();
+			newRot.Pitch = 0.0f;
+			newRot.Roll = 0.0f;
+			SetActorRotation(newRot);
+			SetActorLocation(GetActorLocation() + GetActorForwardVector() * MovementSpeed);
+			*/
+
+			FVector direction = PatrolPath[mCurrentPatrolPointId]->GetActorLocation() - GetActorLocation();
+			float dist = direction.Size();
+			if (dist < DistanceTresholdReachedTarget)
+			{
+				if (goingUpPatrol)
+				{
+					if (mCurrentPatrolPointId == PatrolPath.Num() - 1)
+					{
+						mCurrentPatrolPointId--;
+						goingUpPatrol = false;
+					}
+					else
+					{
+						mCurrentPatrolPointId++;
+					}
+				}
+				else
+				{
+					if (mCurrentPatrolPointId == 0)
+					{
+						mCurrentPatrolPointId++;
+						goingUpPatrol = true;
+					}
+					else
+					{
+						mCurrentPatrolPointId--;
+					}
+				}
+				UNavigationSystem::SimpleMoveToActor(GetController(), PatrolPath[mCurrentPatrolPointId]);
+			}
+		}
+	}
 }

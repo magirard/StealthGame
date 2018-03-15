@@ -49,6 +49,22 @@ protected:
 	UFUNCTION()
 	void ResetOrientation();
 
+	UPROPERTY(EditInstanceOnly, Category = "Patrol")
+	bool bPatrol;
+
+	UPROPERTY(EditInstanceOnly, Category = "Patrol", meta = (EditCondition = "bPatrol"))
+	TArray<AActor*> PatrolPath;
+
+	UPROPERTY(EditInstanceOnly, Category = "Patrol", meta = (EditCondition = "bPatrol"))
+	float DistanceTresholdReachedTarget;
+
+	UPROPERTY(EditInstanceOnly, Category = "Patrol", meta = (EditCondition = "bPatrol"))
+	float MovementSpeed;
+	
+private:
+	int8 mCurrentPatrolPointId;
+	bool goingUpPatrol;
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 };
